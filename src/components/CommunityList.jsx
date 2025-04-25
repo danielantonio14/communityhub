@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import CommunityCard from './CommunityCard';
 import { Link } from 'react-router-dom';
@@ -7,23 +7,26 @@ import { Link } from 'react-router-dom';
 export default function CommunityList() {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'communities'));
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubscribe = onSnapshot(
+      collection(db, 'communities'),
+      (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setCommunities(data);
-      } catch (error) {
-        console.error('Erro ao buscar comunidades:', error);
-      } finally {
         setLoading(false);
+      },
+      (error) => {
+        console.error('Erro ao buscar comunidades:', error.message);
+        setError(`Erro: ${error.message}`);
       }
-    };
-    fetchCommunities();
+    );
+    return () => unsubscribe(); // Limpa o listener ao desmontar
   }, []);
 
   if (loading) return <div className="text-center py-10">Carregando...</div>;
+  if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
   return (
     <div className="container mx-auto p-4">
@@ -35,9 +38,13 @@ export default function CommunityList() {
         Criar Nova Comunidade
       </Link>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {communities.map(community => (
-          <CommunityCard key={community.id} community={community} />
-        ))}
+        {communities.length > 0 ? (
+          communities.map(community => (
+            <CommunityCard key={community.id} community={community} />
+          ))
+        ) : (
+          <p className="text-gray-600">Nenhuma comunidade encontrada.</p>
+        )}
       </div>
     </div>
   );

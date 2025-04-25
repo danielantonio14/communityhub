@@ -7,15 +7,17 @@ export default function CreateCommunityForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !description) {
-      alert('Preencha todos os campos.');
+      setError('Preencha todos os campos.');
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       await addDoc(collection(db, 'communities'), {
         name,
@@ -24,8 +26,8 @@ export default function CreateCommunityForm() {
       });
       navigate('/communities');
     } catch (error) {
-      console.error('Erro ao criar comunidade:', error);
-      alert('Erro ao criar comunidade.');
+      console.error('Erro ao criar comunidade:', error.message);
+      setError(`Erro: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -34,6 +36,7 @@ export default function CreateCommunityForm() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Criar Nova Comunidade</h1>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
         <div className="mb-4">
           <label className="block text-gray-700">Nome</label>

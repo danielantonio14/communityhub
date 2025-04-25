@@ -7,7 +7,7 @@ export default function CommunityCard({ community }) {
       className="border rounded-lg shadow-lg p-4 hover:shadow-xl transition"
     >
       <img
-        src="https://via.placeholder.com/150"
+        src="https://cdn.iconscout.com/icon/free/png-512/free-cdn-icon-download-in-svg-png-gif-file-formats--content-delivery-network-global-whcompare-blue-green-web-hosting-pack-communication-icons-1496574.png?f=webp&w=256"
         alt="Community"
         className="w-full h-32 object-cover rounded mb-4"
       />
